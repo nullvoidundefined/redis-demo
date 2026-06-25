@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/state/usePubSubStream', () => ({ usePubSubStream: () => ['first', 'second'] }));
@@ -15,6 +15,7 @@ describe('PubSubTicker', () => {
 
         fireEvent.change(screen.getByLabelText(/message/i), { target: { value: 'hey' } });
         fireEvent.click(screen.getByRole('button', { name: /publish/i }));
-        expect(publishMessage).toHaveBeenCalledWith('hey');
+        await waitFor(() => expect(publishMessage).toHaveBeenCalledWith('hey'));
+        await waitFor(() => expect(screen.getByLabelText(/message/i)).toHaveValue(''));
     });
 });
