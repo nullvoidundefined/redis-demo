@@ -62,7 +62,7 @@ export function Leaderboard() {
                     </thead>
                     <tbody>
                         {entries.map((entry) => (
-                            <tr key={entry.name}>
+                            <tr key={entry.rank}>
                                 <td>{entry.rank}</td>
                                 <td>{entry.name}</td>
                                 <td>{entry.score}</td>
