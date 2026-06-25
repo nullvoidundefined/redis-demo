@@ -2,12 +2,11 @@
  * connection in subscriber mode rejects ordinary commands. */
 import type Redis from 'ioredis';
 import { createRedisClient } from './createRedisClient';
-
-let subscriber: Redis | undefined;
+import { redisConnections } from './redisConnections';
 
 export function getRedisSubscriber(): Redis {
-    if (!subscriber) {
-        subscriber = createRedisClient();
+    if (!redisConnections.subscriber) {
+        redisConnections.subscriber = createRedisClient();
     }
-    return subscriber;
+    return redisConnections.subscriber;
 }

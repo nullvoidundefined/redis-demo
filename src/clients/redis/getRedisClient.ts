@@ -3,12 +3,11 @@
  * separate connection (getRedisSubscriber). */
 import type Redis from 'ioredis';
 import { createRedisClient } from './createRedisClient';
-
-let client: Redis | undefined;
+import { redisConnections } from './redisConnections';
 
 export function getRedisClient(): Redis {
-    if (!client) {
-        client = createRedisClient();
+    if (!redisConnections.client) {
+        redisConnections.client = createRedisClient();
     }
-    return client;
+    return redisConnections.client;
 }
