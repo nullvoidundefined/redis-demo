@@ -1,0 +1,8 @@
+{
+    "full_name": "redis/redis",
+    "description": "Redis is an in-memory database that persists on disk.",
+    "stargazers_count": 67000,
+    "forks_count": 23800,
+    "open_issues_count": 2400,
+    "language": "C"
+}
