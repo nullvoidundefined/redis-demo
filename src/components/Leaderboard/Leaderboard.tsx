@@ -7,20 +7,22 @@ import { useLeaderboard } from '@/state/useLeaderboard';
 import styles from './Leaderboard.module.scss';
 
 export function Leaderboard() {
-    const { entries, refresh } = useLeaderboard();
+    const { entries, refresh, errorMessage: loadErrorMessage } = useLeaderboard();
     const [name, setName] = useState('');
     const [score, setScore] = useState('');
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
+
+    const visibleError = submitErrorMessage ?? loadErrorMessage;
 
     async function handleSubmit() {
         try {
-            setErrorMessage(null);
+            setSubmitErrorMessage(null);
             await submitScore(name.trim(), Number(score));
             setName('');
             setScore('');
             await refresh();
         } catch {
-            setErrorMessage('Submit failed. Is Redis running?');
+            setSubmitErrorMessage('Submit failed. Is Redis running?');
         }
     }
 
@@ -32,7 +34,7 @@ export function Leaderboard() {
                     id="leaderboard-name"
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(event) => setName(event.target.value)}
                     placeholder="Player name"
                     maxLength={40}
                 />
@@ -41,14 +43,14 @@ export function Leaderboard() {
                     id="leaderboard-score"
                     type="number"
                     value={score}
-                    onChange={(e) => setScore(e.target.value)}
+                    onChange={(event) => setScore(event.target.value)}
                     placeholder="0"
                 />
                 <button onClick={handleSubmit}>Submit score</button>
             </div>
-            {errorMessage && (
+            {visibleError && (
                 <p role="alert" className={styles.error}>
-                    {errorMessage}
+                    {visibleError}
                 </p>
             )}
             {entries.length > 0 && (

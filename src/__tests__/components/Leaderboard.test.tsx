@@ -55,4 +55,11 @@ describe('Leaderboard', () => {
         await screen.findByRole('alert');
         expect(screen.getByRole('alert')).toHaveTextContent('Submit failed. Is Redis running?');
     });
+
+    it('shows a load-error alert when fetchLeaderboard rejects on mount', async () => {
+        fetchLeaderboard.mockRejectedValueOnce(new Error('boom'));
+        render(<Leaderboard />);
+        const alert = await screen.findByRole('alert');
+        expect(alert).toHaveTextContent('Could not load the leaderboard. Is Redis running?');
+    });
 });

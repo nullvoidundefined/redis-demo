@@ -7,20 +7,26 @@ const POLL_INTERVAL_MS = 2000;
 
 export function useLeaderboard() {
     const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const refresh = useCallback(async () => {
         const updatedEntries = await fetchLeaderboard();
         setEntries(updatedEntries);
+        setErrorMessage(null);
     }, []);
 
     useEffect(() => {
         async function loadEntries() {
-            await refresh();
+            try {
+                await refresh();
+            } catch {
+                setErrorMessage('Could not load the leaderboard. Is Redis running?');
+            }
         }
         void loadEntries();
-        const interval = setInterval(() => void refresh(), POLL_INTERVAL_MS);
+        const interval = setInterval(() => void loadEntries(), POLL_INTERVAL_MS);
         return () => clearInterval(interval);
     }, [refresh]);
 
-    return { entries, refresh };
+    return { entries, refresh, errorMessage };
 }
