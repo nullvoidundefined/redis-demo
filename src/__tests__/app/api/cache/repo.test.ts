@@ -28,4 +28,9 @@ describe('DELETE /api/cache/repo', () => {
         expect(response.status).toBe(200);
         expect(await response.json()).toEqual({ cleared: true });
     });
+
+    it('returns 400 when name is missing', async () => {
+        const response = await DELETE(new Request('http://x/api/cache/repo'));
+        expect(response.status).toBe(400);
+    });
 });
