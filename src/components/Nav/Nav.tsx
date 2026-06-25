@@ -9,6 +9,7 @@ const LINKS = [
     { href: '/queue', label: 'Queue' },
     { href: '/pubsub', label: 'Pub/Sub' },
     { href: '/leaderboard', label: 'Leaderboard' },
+    { href: '/session', label: 'Session' },
 ];
 
 export function Nav() {

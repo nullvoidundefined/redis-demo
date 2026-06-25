@@ -1,7 +1,7 @@
 # Redis Patterns Demo (educational MVP)
 
-A single Next.js app demonstrating four common production uses of Redis:
-caching, rate limiting, a background job queue, and pub/sub.
+A single Next.js app demonstrating six common production uses of Redis:
+caching, rate limiting, a background job queue, pub/sub, leaderboards, and session storage.
 
 ## What it does
 
@@ -15,6 +15,8 @@ caching, rate limiting, a background job queue, and pub/sub.
   open tab over SSE.
 - **Leaderboard** (`/leaderboard`) - submit scores into a sorted set (ZADD) and
   watch ZREVRANGE keep the ranking up to date, highest score first.
+- **Session store** (`/session`) - create a short-lived session (SET EX), read it
+  back with a live TTL countdown, and destroy it (DEL) to simulate logout.
 
 ## Setup
 
@@ -32,7 +34,7 @@ caching, rate limiting, a background job queue, and pub/sub.
   per-queue BullMQ connections.
 - `src/clients/github/` - raw GitHub REST call.
 - `src/services/` - the business logic: `cache/`, `rateLimit/`, `queue/`,
-  `pubsub/`, `sse/`.
+  `pubsub/`, `sse/`, `session/`.
 - `src/app/api/` - thin route handlers that call services.
 - `worker.ts` - standalone BullMQ worker process (health endpoint on 3002).
 

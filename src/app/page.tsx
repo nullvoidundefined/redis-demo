@@ -23,6 +23,10 @@ export default function HomePage() {
                     <strong>Leaderboard</strong> - sorted-set ranking with ZADD and ZREVRANGE,
                     highest score always at the top.
                 </li>
+                <li>
+                    <strong>Session store</strong> - short-lived sessions via SET EX / GET / DEL
+                    with a live TTL countdown and destroy (logout) control.
+                </li>
             </ul>
         </section>
     );
