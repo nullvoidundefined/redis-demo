@@ -10,7 +10,7 @@ export async function listJobs(): Promise<JobSummary[]> {
     const jobs = await queue.getJobs(
         ['waiting', 'active', 'completed', 'failed', 'delayed'],
         0,
-        LIST_LIMIT,
+        LIST_LIMIT - 1,
     );
     return Promise.all(
         jobs.filter(Boolean).map(async (job) => toJobSummary(job, await job.getState())),
