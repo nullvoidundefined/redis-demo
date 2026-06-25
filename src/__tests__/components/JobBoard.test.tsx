@@ -33,5 +33,6 @@ describe('JobBoard', () => {
         await waitFor(() => expect(screen.getByText('job-1')).toBeInTheDocument());
         expect(screen.getByText('job-2')).toBeInTheDocument();
         expect(screen.getByText(/boom/)).toBeInTheDocument();
+        expect(screen.getByText(/attempts 1/)).toBeInTheDocument();
     });
 });

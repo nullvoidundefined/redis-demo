@@ -15,8 +15,7 @@ export function useJobBoard() {
 
     useEffect(() => {
         async function loadJobs() {
-            const updatedJobs = await fetchJobs();
-            setJobs(updatedJobs);
+            await refresh();
         }
         void loadJobs();
         const interval = setInterval(() => void refresh(), POLL_INTERVAL_MS);
