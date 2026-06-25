@@ -24,11 +24,13 @@
 ### Task 13: Minor polish (UI error states, test hygiene, stable keys)
 
 **Files:**
+
 - Modify: `src/components/CacheDemo/CacheDemo.tsx`, `src/components/RateLimitDemo/RateLimitDemo.tsx`, `src/components/PubSubTicker/PubSubTicker.tsx`
 - Modify: `src/state/usePubSubStream.ts`
 - Modify tests: `src/__tests__/components/CacheDemo.test.tsx`, `RateLimitDemo.test.tsx`, `PubSubTicker.test.tsx`
 
 **Interfaces:**
+
 - `usePubSubStream(): Array<{ id: number; text: string }>` (changed from `string[]` to give stable keys).
 
 - [ ] **Step 1: Add error state to each interactive component**
@@ -38,12 +40,14 @@ For `CacheDemo`, `RateLimitDemo`, `PubSubTicker`: add a `const [errorMessage, se
 - [ ] **Step 2: Stable keys in PubSubTicker**
 
 Change `src/state/usePubSubStream.ts` to accumulate `{ id, text }` objects. Use a module-or-ref counter for `id` (monotonic), e.g. a `useRef(0)` incremented per message (do NOT use Date.now for the key source of truth; a ref counter is deterministic). Update the effect's message handler:
+
 ```ts
 const nextId = useRef(0);
 // in handler:
 const { message } = JSON.parse(event.data) as { message: string };
 setMessages((current) => [...current, { id: nextId.current++, text: message }]);
 ```
+
 Update `PubSubTicker.tsx` to render `messages.map((m) => <div key={m.id} ...>{m.text}</div>)`.
 
 - [ ] **Step 3: Update the three component tests**
@@ -55,6 +59,7 @@ Update `PubSubTicker.tsx` to render `messages.map((m) => <div key={m.id} ...>{m.
 - [ ] **Step 4: Verify and commit**
 
 Run `npx vitest run && npx tsc --noEmit && npm run lint && npm run format:check`. Then:
+
 ```bash
 git add -A && git commit -m "feat: add UI error states, stable pubsub keys, and test cleanup"
 ```
@@ -64,17 +69,20 @@ git add -A && git commit -m "feat: add UI error states, stable pubsub keys, and 
 ### Task 14: Sliding-window rate limiter
 
 **Files:**
+
 - Create: `src/constants/slidingRateLimit.ts`, `src/services/rateLimit/checkSlidingRateLimit.ts`, `src/app/api/sliding-limited/route.ts`, `src/api/sendSlidingLimitedRequest.ts`, `src/components/SlidingRateLimitDemo/SlidingRateLimitDemo.tsx` + `.module.scss`
 - Modify: `src/app/rate-limit/page.tsx` (render both demos with explanatory headings)
 - Test: `src/__tests__/integration/slidingRateLimit.test.ts`, `src/__tests__/app/api/slidingLimited.test.ts`, `src/__tests__/components/SlidingRateLimitDemo.test.tsx`
 
 **Interfaces:**
+
 - Consumes `getRedisClient`, `RateLimitResult` (`{ allowed, remaining, resetIn }`).
 - Produces `checkSlidingRateLimit(clientId: string): Promise<RateLimitResult>`; `POST /api/sliding-limited` -> 200 or 429 + `Retry-After`; `sendSlidingLimitedRequest(): Promise<{ status: number; result: RateLimitResult }>`.
 
 - [ ] **Step 1: Constants**
 
 `src/constants/slidingRateLimit.ts`:
+
 ```ts
 /** Sliding-window rate limiter tuning and key namespace. */
 export const SLIDING_WINDOW_SECONDS = 10;
@@ -93,6 +101,7 @@ export const SLIDING_KEY_PREFIX = 'ratelimit:slide:';
 - [ ] **Step 4: Implement the sliding-window service**
 
 `src/services/rateLimit/checkSlidingRateLimit.ts`:
+
 ```ts
 /** Sliding-window rate limiter using a Redis sorted set: each request is a member
  * scored by timestamp; expired entries are evicted before counting, so the window
@@ -123,7 +132,10 @@ export async function checkSlidingRateLimit(clientId: string): Promise<RateLimit
 
     const oldest = await redis.zrange(key, 0, 0, 'WITHSCORES');
     const oldestScore = oldest.length === 2 ? Number(oldest[1]) : now;
-    const resetIn = Math.max(1, Math.ceil((oldestScore + windowMs - now) / MILLISECONDS_PER_SECOND));
+    const resetIn = Math.max(
+        1,
+        Math.ceil((oldestScore + windowMs - now) / MILLISECONDS_PER_SECOND),
+    );
 
     if (count > SLIDING_MAX_REQUESTS) {
         return { allowed: false, remaining: 0, resetIn };
@@ -147,6 +159,7 @@ export async function checkSlidingRateLimit(clientId: string): Promise<RateLimit
 - [ ] **Step 8: Verify and commit**
 
 `npx vitest run && npx tsc --noEmit && npm run lint && npm run format:check`, then:
+
 ```bash
 git add -A && git commit -m "feat: add sliding-window rate limiter demo (sorted set)"
 ```
@@ -156,11 +169,13 @@ git add -A && git commit -m "feat: add sliding-window rate limiter demo (sorted 
 ### Task 15: Sorted-set leaderboard
 
 **Files:**
+
 - Create: `src/constants/leaderboard.ts`, `src/types/leaderboard.ts`, `src/services/leaderboard/submitScore.ts`, `src/services/leaderboard/getLeaderboard.ts`, `src/app/api/leaderboard/route.ts`, `src/api/submitScore.ts`, `src/api/fetchLeaderboard.ts`, `src/state/useLeaderboard.ts`, `src/components/Leaderboard/Leaderboard.tsx` + `.module.scss`, `src/app/leaderboard/page.tsx`
 - Modify: `src/components/Nav/Nav.tsx`, `src/app/page.tsx`, `README.md`
 - Test: `src/__tests__/integration/leaderboard.test.ts`, `src/__tests__/app/api/leaderboard.test.ts`, `src/__tests__/components/Leaderboard.test.tsx`
 
 **Interfaces:**
+
 - `LeaderboardEntry = { name: string; score: number; rank: number }`.
 - `submitScore(name: string, score: number): Promise<void>` (ZADD).
 - `getLeaderboard(): Promise<LeaderboardEntry[]>` (ZREVRANGE top N WITHSCORES, rank = index + 1).
@@ -170,12 +185,15 @@ git add -A && git commit -m "feat: add sliding-window rate limiter demo (sorted 
 - [ ] **Step 1: Constants + type**
 
 `src/constants/leaderboard.ts`:
+
 ```ts
 /** Leaderboard demo: the sorted-set key and how many top entries to show. */
 export const LEADERBOARD_KEY = 'leaderboard:demo';
 export const LEADERBOARD_TOP_N = 10;
 ```
+
 `src/types/leaderboard.ts`:
+
 ```ts
 export type LeaderboardEntry = {
     name: string;
@@ -193,6 +211,7 @@ export type LeaderboardEntry = {
 - [ ] **Step 4: Implement the services**
 
 `src/services/leaderboard/submitScore.ts`:
+
 ```ts
 /** Records a player's score in the leaderboard sorted set (higher score ranks higher). */
 import { getRedisClient } from '@/clients/redis/getRedisClient';
@@ -202,7 +221,9 @@ export async function submitScore(name: string, score: number): Promise<void> {
     await getRedisClient().zadd(LEADERBOARD_KEY, score, name);
 }
 ```
+
 `src/services/leaderboard/getLeaderboard.ts`:
+
 ```ts
 /** Reads the top-N leaderboard entries, highest score first, with 1-based rank. */
 import { getRedisClient } from '@/clients/redis/getRedisClient';
@@ -210,7 +231,12 @@ import { LEADERBOARD_KEY, LEADERBOARD_TOP_N } from '@/constants/leaderboard';
 import type { LeaderboardEntry } from '@/types/leaderboard';
 
 export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
-    const flat = await getRedisClient().zrevrange(LEADERBOARD_KEY, 0, LEADERBOARD_TOP_N - 1, 'WITHSCORES');
+    const flat = await getRedisClient().zrevrange(
+        LEADERBOARD_KEY,
+        0,
+        LEADERBOARD_TOP_N - 1,
+        'WITHSCORES',
+    );
     const entries: LeaderboardEntry[] = [];
     for (let i = 0; i < flat.length; i += 2) {
         entries.push({ name: flat[i], score: Number(flat[i + 1]), rank: i / 2 + 1 });
@@ -232,6 +258,7 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
 - [ ] **Step 8: README + verify + commit**
 
 Add the Leaderboard demo to `README.md`'s demo list. `npx vitest run && npx tsc --noEmit && npm run lint && npm run format:check`, then:
+
 ```bash
 git add -A && git commit -m "feat: add sorted-set leaderboard demo"
 ```
@@ -241,11 +268,13 @@ git add -A && git commit -m "feat: add sorted-set leaderboard demo"
 ### Task 16: Session store
 
 **Files:**
+
 - Create: `src/constants/session.ts`, `src/types/session.ts`, `src/services/session/createSession.ts`, `src/services/session/getSession.ts`, `src/services/session/destroySession.ts`, `src/app/api/session/route.ts` (POST create + GET-needs-token... see below), `src/app/api/session/[token]/route.ts` (GET + DELETE), `src/api/createSession.ts`, `src/api/fetchSession.ts`, `src/api/destroySession.ts`, `src/components/SessionDemo/SessionDemo.tsx` + `.module.scss`, `src/app/session/page.tsx`
 - Modify: `src/components/Nav/Nav.tsx`, `src/app/page.tsx`, `README.md`
 - Test: `src/__tests__/integration/session.test.ts`, `src/__tests__/app/api/session.test.ts`, `src/__tests__/components/SessionDemo.test.tsx`
 
 **Interfaces:**
+
 - `SessionRecord = { label: string; createdAt: string }`; `SessionView = { token: string; data: SessionRecord; ttl: number }`.
 - `createSession(label: string): Promise<string>` (returns a `randomUUID` token; `SET session:<token> json EX SESSION_TTL_SECONDS`).
 - `getSession(token: string): Promise<SessionView | null>` (GET + parse + `ttl`; null if absent).
@@ -256,12 +285,15 @@ git add -A && git commit -m "feat: add sorted-set leaderboard demo"
 - [ ] **Step 1: Constants + types**
 
 `src/constants/session.ts`:
+
 ```ts
 /** Session-store demo: key namespace and session lifetime. */
 export const SESSION_KEY_PREFIX = 'session:';
 export const SESSION_TTL_SECONDS = 1800;
 ```
+
 `src/types/session.ts`:
+
 ```ts
 export type SessionRecord = {
     label: string;
@@ -284,6 +316,7 @@ export type SessionView = {
 - [ ] **Step 4: Implement services**
 
 `createSession.ts`:
+
 ```ts
 /** Creates a session: stores a small record under a random token with a TTL,
  * returns the token (the SET EX / GET / DEL lifecycle is the teaching point). */
@@ -304,7 +337,9 @@ export async function createSession(label: string): Promise<string> {
     return token;
 }
 ```
+
 `getSession.ts`:
+
 ```ts
 /** Reads a session record and its remaining TTL, or null if it has expired/never existed. */
 import { getRedisClient } from '@/clients/redis/getRedisClient';
@@ -322,7 +357,9 @@ export async function getSession(token: string): Promise<SessionView | null> {
     return { token, data, ttl: await redis.ttl(key) };
 }
 ```
+
 `destroySession.ts`:
+
 ```ts
 /** Destroys a session by deleting its key (logout). */
 import { getRedisClient } from '@/clients/redis/getRedisClient';
@@ -346,6 +383,7 @@ export async function destroySession(token: string): Promise<void> {
 - [ ] **Step 8: README + verify + commit**
 
 Add Session demo to `README.md`. `npx vitest run && npx tsc --noEmit && npm run lint && npm run format:check`, then:
+
 ```bash
 git add -A && git commit -m "feat: add session-store demo (SET EX / GET / DEL)"
 ```
@@ -355,6 +393,7 @@ git add -A && git commit -m "feat: add session-store demo (SET EX / GET / DEL)"
 ### Task 17: Playwright E2E suite + accessibility
 
 **Files:**
+
 - Create: `e2e/caching.spec.ts`, `e2e/rateLimit.spec.ts`, `e2e/queue.spec.ts`, `e2e/pubsub.spec.ts`, `e2e/leaderboard.spec.ts`, `e2e/session.spec.ts`, `e2e/accessibility.spec.ts`
 - Modify: `e2e/smoke.spec.ts` may stay as-is; `README.md` (note `npm run test:e2e` covers the demos)
 
@@ -363,6 +402,7 @@ git add -A && git commit -m "feat: add session-store demo (SET EX / GET / DEL)"
 - [ ] **Step 1: Per-demo happy-path + error specs**
 
 Write one spec per demo. Each navigates to the route and asserts the core happy path against the REAL running app + Redis:
+
 - `caching.spec.ts`: go to `/caching`, click Fetch, assert a HIT or MISS badge appears and the repo name renders; click "Clear cache", assert the result panel clears.
 - `rateLimit.spec.ts`: go to `/rate-limit`, click the fixed-window "Spam" button, assert a BLOCKED/429 state eventually appears (the window is 10/10s, so spamming 15 triggers it). Do the same for the sliding-window demo section.
 - `queue.spec.ts`: go to `/queue`, click "Enqueue normal job", assert a job id appears in the board (in Waiting or Active). NOTE: the Playwright webServer starts only Next.js, NOT the BullMQ worker, so jobs will NOT complete during E2E. Assert only that the job is enqueued and appears on the board; do NOT assert completion. Add a code comment stating this.
@@ -375,6 +415,7 @@ Each spec uses role-based locators (`getByRole`) and `expect(...).toBeVisible()`
 - [ ] **Step 2: Accessibility spec (axe)**
 
 `e2e/accessibility.spec.ts` using `@axe-core/playwright` (already a devDependency):
+
 ```ts
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
@@ -384,13 +425,12 @@ const ROUTES = ['/', '/caching', '/rate-limit', '/queue', '/pubsub', '/leaderboa
 for (const route of ROUTES) {
     test(`no detectable accessibility violations on ${route}`, async ({ page }) => {
         await page.goto(route);
-        const results = await new AxeBuilder({ page })
-            .withTags(['wcag2a', 'wcag2aa'])
-            .analyze();
+        const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
         expect(results.violations).toEqual([]);
     });
 }
 ```
+
 If axe reports real violations, FIX the underlying component (semantic HTML, labels, contrast, one h1 per page, heading order) rather than weakening the assertion. Document any fix in the report.
 
 - [ ] **Step 3: Run the full E2E suite locally**
@@ -400,6 +440,7 @@ Ensure local Redis is up. Run `npx playwright install chromium` (if needed) then
 - [ ] **Step 4: Update README + final full verification**
 
 Note in `README.md` that `npm run test:e2e` runs the Playwright suite (needs Redis up + a prod build; the worker is not started, so the queue E2E asserts enqueue only). Then run the COMPLETE gate set:
+
 ```
 npx tsc --noEmit
 npm run lint
@@ -408,6 +449,7 @@ npx vitest run
 npm run build
 REDIS_URL=redis://localhost:6379 npx playwright test
 ```
+
 All must pass. Report each result.
 
 - [ ] **Step 5: Commit**
@@ -421,6 +463,7 @@ git add -A && git commit -m "test(e2e): add per-demo and accessibility Playwrigh
 ## Self-Review
 
 **Spec coverage of the requested optional items:**
+
 - Minor polish (UI error states, test hygiene, stable pubsub keys) -> Task 13. ✓
 - Sliding-window rate limiter -> Task 14. ✓
 - Sorted-set leaderboard -> Task 15. ✓
@@ -433,6 +476,7 @@ git add -A && git commit -m "test(e2e): add per-demo and accessibility Playwrigh
 **Placeholder scan:** none. New-pattern services give full code; boilerplate (routes/wrappers/UI) references the exact existing exemplar files to mirror, which the implementer can read.
 
 **Known notes (not gaps):**
+
 - Leaderboard and the demo session use shared keys; integration tests clear those demo keys (acceptable - demo data, documented in the tests).
 - Queue E2E cannot assert job completion because Playwright's webServer does not start the BullMQ worker; specs assert enqueue/appearance only (documented in the spec and README).
 - `randomUUID` / `Date.now` / `new Date` are used in app/service code (allowed; the restriction is only for workflow scripts).
