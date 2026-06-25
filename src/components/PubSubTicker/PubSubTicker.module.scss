@@ -1,0 +1,22 @@
+.panel {
+    background: var(--panel);
+    padding: 1rem;
+    border-radius: 8px;
+    max-width: 540px;
+}
+
+.row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.ticker {
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.message {
+    border-top: 1px solid #2a3340;
+    padding: 0.4rem 0;
+}
