@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const sendLimitedRequest = vi.hoisted(() => vi.fn());
 vi.mock('@/api/sendLimitedRequest', () => ({ sendLimitedRequest }));
@@ -7,6 +7,10 @@ vi.mock('@/api/sendLimitedRequest', () => ({ sendLimitedRequest }));
 import { RateLimitDemo } from '@/components/RateLimitDemo/RateLimitDemo';
 
 describe('RateLimitDemo', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('shows remaining on success and a blocked state on 429', async () => {
         sendLimitedRequest.mockResolvedValueOnce({
             status: 200,
@@ -22,5 +26,13 @@ describe('RateLimitDemo', () => {
         });
         fireEvent.click(screen.getByRole('button', { name: /send request/i }));
         await waitFor(() => expect(screen.getByText(/blocked/i)).toBeInTheDocument());
+    });
+
+    it('shows an error alert when the request fails', async () => {
+        sendLimitedRequest.mockRejectedValueOnce(new Error('boom'));
+        render(<RateLimitDemo />);
+        fireEvent.click(screen.getByRole('button', { name: /send request/i }));
+        await screen.findByRole('alert');
+        expect(screen.getByRole('alert')).toHaveTextContent('Request failed. Is Redis running?');
     });
 });

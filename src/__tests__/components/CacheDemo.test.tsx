@@ -1,19 +1,24 @@
 import { fireEvent, render, screen, waitFor, act } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/api/fetchCachedRepo', () => ({
-    fetchCachedRepo: vi.fn().mockResolvedValue({
-        source: 'MISS',
-        data: { fullName: 'redis/redis', stars: 5 },
-        ttl: 60,
-    }),
-}));
-vi.mock('@/api/clearCachedRepo', () => ({ clearCachedRepo: vi.fn().mockResolvedValue(undefined) }));
+const fetchCachedRepo = vi.hoisted(() => vi.fn());
+const clearCachedRepo = vi.hoisted(() => vi.fn());
+vi.mock('@/api/fetchCachedRepo', () => ({ fetchCachedRepo }));
+vi.mock('@/api/clearCachedRepo', () => ({ clearCachedRepo }));
 
-import { clearCachedRepo } from '@/api/clearCachedRepo';
 import { CacheDemo } from '@/components/CacheDemo/CacheDemo';
 
 describe('CacheDemo', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        fetchCachedRepo.mockResolvedValue({
+            source: 'MISS',
+            data: { fullName: 'redis/redis', stars: 5 },
+            ttl: 60,
+        });
+        clearCachedRepo.mockResolvedValue(undefined);
+    });
+
     it('fetches and shows the HIT/MISS source and repo data', async () => {
         render(<CacheDemo />);
         fireEvent.click(screen.getByRole('button', { name: /fetch/i }));
@@ -31,5 +36,13 @@ describe('CacheDemo', () => {
         expect(clearCachedRepo).toHaveBeenCalled();
         expect(screen.queryByText(/MISS/)).not.toBeInTheDocument();
         expect(screen.queryByText(/redis\/redis/)).not.toBeInTheDocument();
+    });
+
+    it('shows an error alert when the fetch request fails', async () => {
+        fetchCachedRepo.mockRejectedValueOnce(new Error('boom'));
+        render(<CacheDemo />);
+        fireEvent.click(screen.getByRole('button', { name: /fetch/i }));
+        await screen.findByRole('alert');
+        expect(screen.getByRole('alert')).toHaveTextContent('Request failed. Is Redis running?');
     });
 });

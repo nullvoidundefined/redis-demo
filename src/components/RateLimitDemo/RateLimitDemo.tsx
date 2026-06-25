@@ -12,11 +12,17 @@ const SPAM_COUNT = 15;
 export function RateLimitDemo() {
     const [result, setResult] = useState<RateLimitResult | null>(null);
     const [blocked, setBlocked] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     async function sendOne() {
-        const { status, result: next } = await sendLimitedRequest();
-        setResult(next);
-        setBlocked(status === 429);
+        try {
+            setErrorMessage(null);
+            const { status, result: next } = await sendLimitedRequest();
+            setResult(next);
+            setBlocked(status === 429);
+        } catch {
+            setErrorMessage('Request failed. Is Redis running?');
+        }
     }
 
     async function spam() {
@@ -29,6 +35,11 @@ export function RateLimitDemo() {
         <div className={styles.panel}>
             <button onClick={sendOne}>Send request</button>
             <button onClick={spam}>Spam {SPAM_COUNT}</button>
+            {errorMessage && (
+                <p role="alert" className={styles.error}>
+                    {errorMessage}
+                </p>
+            )}
             {result && (
                 <p className={blocked ? styles.blocked : undefined}>
                     {blocked ? 'BLOCKED (429)' : 'OK'} - remaining: {result.remaining} - reset in{' '}

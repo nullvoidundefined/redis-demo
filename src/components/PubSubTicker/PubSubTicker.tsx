@@ -10,13 +10,19 @@ import styles from './PubSubTicker.module.scss';
 export function PubSubTicker() {
     const messages = usePubSubStream();
     const [draft, setDraft] = useState('');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     async function handlePublish() {
         if (!draft) {
             return;
         }
-        await publishMessage(draft);
-        setDraft('');
+        try {
+            setErrorMessage(null);
+            await publishMessage(draft);
+            setDraft('');
+        } catch {
+            setErrorMessage('Request failed. Is Redis running?');
+        }
     }
 
     return (
@@ -30,10 +36,15 @@ export function PubSubTicker() {
                 />
                 <button onClick={handlePublish}>Publish</button>
             </div>
+            {errorMessage && (
+                <p role="alert" className={styles.error}>
+                    {errorMessage}
+                </p>
+            )}
             <div className={styles.ticker}>
-                {messages.map((message, index) => (
-                    <div key={index} className={styles.message}>
-                        {message}
+                {messages.map((m) => (
+                    <div key={m.id} className={styles.message}>
+                        {m.text}
                     </div>
                 ))}
             </div>

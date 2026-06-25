@@ -1,15 +1,21 @@
 /** Opens the SSE stream and accumulates received messages newest-last. */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PubSubMessage } from '@/types/pubsubMessage';
 
-export function usePubSubStream(): string[] {
-    const [messages, setMessages] = useState<string[]>([]);
+export type StreamMessage = {
+    id: number;
+    text: string;
+};
+
+export function usePubSubStream(): StreamMessage[] {
+    const [messages, setMessages] = useState<StreamMessage[]>([]);
+    const nextId = useRef(0);
 
     useEffect(() => {
         const source = new EventSource('/api/pubsub/stream');
         source.onmessage = (event) => {
             const { message } = JSON.parse(event.data) as PubSubMessage;
-            setMessages((current) => [...current, message]);
+            setMessages((current) => [...current, { id: nextId.current++, text: message }]);
         };
         return () => source.close();
     }, []);

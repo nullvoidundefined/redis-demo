@@ -15,19 +15,30 @@ export function CacheDemo() {
     const [name, setName] = useState(DEFAULT_REPO);
     const [result, setResult] = useState<CachedRepoResult | null>(null);
     const [latencyMs, setLatencyMs] = useState<number | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const ttl = useCountdown(result?.ttl ?? 0);
 
     async function handleFetch() {
-        const start = performance.now();
-        const next = await fetchCachedRepo(name);
-        setLatencyMs(Math.round(performance.now() - start));
-        setResult(next);
+        try {
+            setErrorMessage(null);
+            const start = performance.now();
+            const next = await fetchCachedRepo(name);
+            setLatencyMs(Math.round(performance.now() - start));
+            setResult(next);
+        } catch {
+            setErrorMessage('Request failed. Is Redis running?');
+        }
     }
 
     async function handleClear() {
-        await clearCachedRepo(name);
-        setResult(null);
-        setLatencyMs(null);
+        try {
+            setErrorMessage(null);
+            await clearCachedRepo(name);
+            setResult(null);
+            setLatencyMs(null);
+        } catch {
+            setErrorMessage('Request failed. Is Redis running?');
+        }
     }
 
     return (
@@ -38,6 +49,11 @@ export function CacheDemo() {
                 <button onClick={handleFetch}>Fetch</button>
                 <button onClick={handleClear}>Clear cache</button>
             </div>
+            {errorMessage && (
+                <p role="alert" className={styles.error}>
+                    {errorMessage}
+                </p>
+            )}
             {result && (
                 <div>
                     <p className={result.source === 'HIT' ? styles.hit : styles.miss}>
