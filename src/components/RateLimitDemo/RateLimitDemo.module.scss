@@ -1,0 +1,11 @@
+.panel {
+    background: var(--panel);
+    padding: 1rem;
+    border-radius: 8px;
+    max-width: 540px;
+}
+
+.blocked {
+    color: var(--error);
+    font-weight: 700;
+}
