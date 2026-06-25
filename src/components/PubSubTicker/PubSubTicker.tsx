@@ -43,7 +43,7 @@ export function PubSubTicker() {
             )}
             <div className={styles.ticker}>
                 {messages.map((m) => (
-                    <div key={m.id} className={styles.message}>
+                    <div key={m.id} className={styles.message} data-testid="ticker-message">
                         {m.text}
                     </div>
                 ))}

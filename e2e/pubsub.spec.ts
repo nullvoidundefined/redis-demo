@@ -24,17 +24,14 @@ test.describe('Pub/Sub demo', () => {
         await expect(page.getByText(uniqueMessage)).toBeVisible({ timeout: 10_000 });
     });
 
-    test('publish button is disabled-by-behaviour when message is empty', async ({ page }) => {
+    test('publishing an empty message does not add a ticker entry', async ({ page }) => {
         // The component guards against empty draft in handlePublish (returns early).
         // Clicking with an empty input should not add any entry to the ticker.
-        const tickerLocator = page.locator('.message');
-        const countBefore = await tickerLocator.count();
+        const ticker = page.getByTestId('ticker-message');
+        const countBefore = await ticker.count();
 
         await page.getByRole('button', { name: 'Publish' }).click();
 
-        // Wait a moment then assert no new message appeared.
-        await page.waitForTimeout(500);
-        const countAfter = await tickerLocator.count();
-        expect(countAfter).toBe(countBefore);
+        await expect(ticker).toHaveCount(countBefore);
     });
 });
