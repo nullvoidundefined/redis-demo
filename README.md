@@ -13,6 +13,8 @@ caching, rate limiting, a background job queue, and pub/sub.
   and exponential backoff. Flaky jobs fail twice then succeed.
 - **Pub/Sub** (`/pubsub`) - publish a message and watch it stream live to every
   open tab over SSE.
+- **Leaderboard** (`/leaderboard`) - submit scores into a sorted set (ZADD) and
+  watch ZREVRANGE keep the ranking up to date, highest score first.
 
 ## Setup
 

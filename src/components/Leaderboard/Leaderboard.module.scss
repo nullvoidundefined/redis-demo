@@ -1,0 +1,34 @@
+.panel {
+    background: var(--panel);
+    padding: 1rem;
+    border-radius: 8px;
+    max-width: 540px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.error {
+    color: var(--error);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid #2a3340;
+}
+
+.table th {
+    font-weight: 600;
+}

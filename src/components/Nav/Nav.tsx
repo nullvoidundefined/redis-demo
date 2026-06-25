@@ -8,6 +8,7 @@ const LINKS = [
     { href: '/rate-limit', label: 'Rate Limit' },
     { href: '/queue', label: 'Queue' },
     { href: '/pubsub', label: 'Pub/Sub' },
+    { href: '/leaderboard', label: 'Leaderboard' },
 ];
 
 export function Nav() {

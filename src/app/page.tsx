@@ -19,6 +19,10 @@ export default function HomePage() {
                 <li>
                     <strong>Pub/Sub</strong> - live messages streamed to the browser over SSE.
                 </li>
+                <li>
+                    <strong>Leaderboard</strong> - sorted-set ranking with ZADD and ZREVRANGE,
+                    highest score always at the top.
+                </li>
             </ul>
         </section>
     );
