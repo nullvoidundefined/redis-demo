@@ -2,7 +2,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/state/usePubSubStream', () => ({ usePubSubStream: () => ['first', 'second'] }));
-const { publishMessage } = vi.hoisted(() => ({ publishMessage: vi.fn().mockResolvedValue(undefined) }));
+const { publishMessage } = vi.hoisted(() => ({
+    publishMessage: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock('@/api/publishMessage', () => ({ publishMessage }));
 
 import { PubSubTicker } from '@/components/PubSubTicker/PubSubTicker';

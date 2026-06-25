@@ -2,7 +2,10 @@
 import type { Job, JobState } from 'bullmq';
 import type { JobData, JobResult, JobSummary } from '@/types/job';
 
-export function toJobSummary(job: Job<JobData, JobResult>, state: JobState | 'unknown'): JobSummary {
+export function toJobSummary(
+    job: Job<JobData, JobResult>,
+    state: JobState | 'unknown',
+): JobSummary {
     return {
         id: job.id ?? '',
         state,

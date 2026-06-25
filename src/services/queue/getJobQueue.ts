@@ -12,7 +12,9 @@ let queue: Queue | undefined;
 export function getJobQueue(): Queue {
     if (!queue) {
         queue = new Queue(QUEUE_NAME, {
-            connection: createRedisClient({ maxRetriesPerRequest: null }) as unknown as ConnectionOptions,
+            connection: createRedisClient({
+                maxRetriesPerRequest: null,
+            }) as unknown as ConnectionOptions,
         });
     }
     return queue;
