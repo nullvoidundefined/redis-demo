@@ -6,5 +6,5 @@ export async function fetchJobs(): Promise<JobSummary[]> {
     if (!response.ok) {
         throw new Error(`Fetch jobs failed: ${response.status}`);
     }
-    return response.json();
+    return response.json() as Promise<JobSummary[]>;
 }
