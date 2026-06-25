@@ -40,9 +40,24 @@ caching, rate limiting, a background job queue, pub/sub, leaderboards, and sessi
 
 ## Tests
 
-`npm test` runs the Vitest suite. Integration tests under
+`npm test` runs the Vitest unit and integration suite. Integration tests under
 `src/__tests__/integration/` hit a real Redis, so `docker compose up -d` must be
 running first. They isolate by key prefix and never flush the database.
+
+`npm run test:e2e` runs the Playwright E2E suite. Prerequisites:
+
+- Redis must be running (`docker compose up -d` or `REDIS_URL=redis://localhost:6379`).
+- A production build is auto-created by the Playwright web-server config before
+  tests run (`npm run build && npm run start`).
+- The BullMQ **worker is not started** by the Playwright web-server. Queue E2E
+  specs only assert that a job is enqueued and appears on the board (Waiting state);
+  they do not assert job completion.
+
+Run the full E2E suite:
+
+```
+REDIS_URL=redis://localhost:6379 npx playwright test
+```
 
 ## Deployment
 
