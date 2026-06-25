@@ -1,0 +1,20 @@
+.panel {
+    background: var(--panel);
+    padding: 1rem;
+    border-radius: 8px;
+    max-width: 540px;
+}
+
+.hit {
+    color: var(--hit);
+}
+
+.miss {
+    color: var(--miss);
+}
+
+.row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
