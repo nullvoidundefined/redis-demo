@@ -11,7 +11,13 @@ export async function GET() {
     const stream = new ReadableStream({
         async start(controller) {
             unsubscribe = await subscribeToChannel((message) => {
-                controller.enqueue(encoder.encode(encodeSseEvent({ message })));
+                try {
+                    controller.enqueue(encoder.encode(encodeSseEvent({ message })));
+                } catch {
+                    // Controller already closed (client disconnected); detach so this
+                    // stale handler stops firing.
+                    unsubscribe();
+                }
             });
         },
         cancel() {

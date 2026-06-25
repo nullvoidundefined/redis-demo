@@ -27,7 +27,16 @@ test.describe('Pub/Sub demo', () => {
     test('publishing an empty message does not add a ticker entry', async ({ page }) => {
         // The component guards against empty draft in handlePublish (returns early).
         // Clicking with an empty input should not add any entry to the ticker.
+        // Wait for the SSE ticker to stabilise (any stale Redis messages from prior
+        // tests have arrived) before capturing the baseline count.
         const ticker = page.getByTestId('ticker-message');
+        await page.waitForFunction(async () => {
+            const selector = '[data-testid="ticker-message"]';
+            const before = document.querySelectorAll(selector).length;
+            await new Promise((resolve) => setTimeout(resolve, 600));
+            const after = document.querySelectorAll(selector).length;
+            return before === after;
+        });
         const countBefore = await ticker.count();
 
         await page.getByRole('button', { name: 'Publish' }).click();
