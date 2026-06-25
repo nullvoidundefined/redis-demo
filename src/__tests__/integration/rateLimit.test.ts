@@ -23,6 +23,7 @@ describe('checkRateLimit (integration)', () => {
         }
         expect(last.allowed).toBe(true);
         expect(last.remaining).toBe(0);
+        expect(last.resetIn).toBeGreaterThan(0);
 
         const blocked = await checkRateLimit(CLIENT_ID);
         expect(blocked.allowed).toBe(false);

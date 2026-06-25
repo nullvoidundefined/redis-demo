@@ -10,7 +10,7 @@ describe('POST /api/limited', () => {
         checkRateLimit.mockResolvedValueOnce({ allowed: true, remaining: 4, resetIn: 8 });
         const response = await POST(new Request('http://x/api/limited', { method: 'POST' }));
         expect(response.status).toBe(200);
-        expect(await response.json()).toMatchObject({ remaining: 4 });
+        expect(await response.json()).toMatchObject({ allowed: true, remaining: 4, resetIn: 8 });
     });
 
     it('returns 429 with Retry-After when blocked', async () => {
