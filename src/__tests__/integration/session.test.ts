@@ -7,19 +7,20 @@ import { createSession } from '@/services/session/createSession';
 import { destroySession } from '@/services/session/destroySession';
 import { getSession } from '@/services/session/getSession';
 
-let createdToken: string | null = null;
+const createdTokens: string[] = [];
 
 afterAll(async () => {
-    if (createdToken) {
-        await getRedisClient().del(`${SESSION_KEY_PREFIX}${createdToken}`);
+    const redis = getRedisClient();
+    for (const token of createdTokens) {
+        await redis.del(`${SESSION_KEY_PREFIX}${token}`);
     }
-    await getRedisClient().quit();
+    await redis.quit();
 });
 
 describe('session services (integration)', () => {
     it('creates a session and reads it back with ttl > 0', async () => {
         const token = await createSession('test-label');
-        createdToken = token;
+        createdTokens.push(token);
 
         const view = await getSession(token);
         expect(view).not.toBeNull();
@@ -30,7 +31,7 @@ describe('session services (integration)', () => {
 
     it('returns null after the session is destroyed', async () => {
         const token = await createSession('to-destroy');
-        createdToken = token;
+        createdTokens.push(token);
 
         await destroySession(token);
         const view = await getSession(token);
