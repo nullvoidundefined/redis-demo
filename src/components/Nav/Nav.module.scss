@@ -1,0 +1,15 @@
+.nav {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--panel);
+}
+
+.link {
+    color: var(--accent);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}

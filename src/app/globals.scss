@@ -1,0 +1,31 @@
+:root {
+    --bg: #0b0e14;
+    --panel: #151a23;
+    --text: #e6e6e6;
+    --accent: #5aa9e6;
+    --hit: #4caf50;
+    --miss: #e0a458;
+    --error: #e05a5a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, sans-serif;
+}
+
+main {
+    padding: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
