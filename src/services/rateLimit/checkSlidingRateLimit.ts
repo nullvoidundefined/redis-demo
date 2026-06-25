@@ -20,7 +20,7 @@ export async function checkSlidingRateLimit(clientId: string): Promise<RateLimit
     const windowMs = SLIDING_WINDOW_SECONDS * MILLISECONDS_PER_SECOND;
     const windowStart = now - windowMs;
 
-    await redis.zremrangebyscore(key, 0, windowStart);
+    await redis.zremrangebyscore(key, '-inf', `(${windowStart}`);
     await redis.zadd(key, now, `${now}:${randomUUID()}`);
     await redis.expire(key, SLIDING_WINDOW_SECONDS);
     const count = await redis.zcard(key);
