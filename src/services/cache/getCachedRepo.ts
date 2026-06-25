@@ -4,6 +4,7 @@ import { getRepoStats } from '@/clients/github/getRepoStats';
 import { getRedisClient } from '@/clients/redis/getRedisClient';
 import { CACHE_KEY_PREFIX, CACHE_TTL_SECONDS } from '@/constants/cache';
 import type { CachedRepoResult } from '@/types/cacheResult';
+import type { RepoStats } from '@/types/repoStats';
 
 export async function getCachedRepo(fullName: string): Promise<CachedRepoResult> {
     const redis = getRedisClient();
@@ -11,7 +12,7 @@ export async function getCachedRepo(fullName: string): Promise<CachedRepoResult>
     const cached = await redis.get(key);
     if (cached) {
         const ttl = await redis.ttl(key);
-        return { source: 'HIT', data: JSON.parse(cached), ttl };
+        return { source: 'HIT', data: JSON.parse(cached) as RepoStats, ttl };
     }
     const data = await getRepoStats(fullName);
     await redis.set(key, JSON.stringify(data), 'EX', CACHE_TTL_SECONDS);

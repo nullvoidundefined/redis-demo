@@ -11,10 +11,10 @@ const worker = new Worker(QUEUE_NAME, processJob, {
     connection: createRedisClient({ maxRetriesPerRequest: null }) as unknown as ConnectionOptions,
 });
 
-worker.on('completed', (job) => console.log(`completed ${job.id}`));
-worker.on('failed', (job, error) => console.log(`failed ${job?.id}: ${error.message}`));
+worker.on('completed', (job) => console.info(`completed ${job.id}`));
+worker.on('failed', (job, error) => console.info(`failed ${job?.id}: ${error.message}`));
 
 createServer((_request, response) => {
     response.writeHead(200, { 'Content-Type': 'application/json' });
     response.end(JSON.stringify({ status: 'ok' }));
-}).listen(WORKER_PORT, () => console.log(`worker health on ${WORKER_PORT}`));
+}).listen(WORKER_PORT, () => console.info(`worker health on ${WORKER_PORT}`));

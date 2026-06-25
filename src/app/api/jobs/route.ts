@@ -9,7 +9,7 @@ const EnqueueSchema = z.object({
 });
 
 export async function POST(request: Request) {
-    const body = await request.json().catch(() => null);
+    const body: unknown = await request.json().catch(() => null);
     const parsed = EnqueueSchema.safeParse(body);
     if (!parsed.success) {
         return Response.json({ error: 'Invalid body' }, { status: 400 });

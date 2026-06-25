@@ -10,6 +10,6 @@ export async function enqueueJob(type: JobType, label: string): Promise<string> 
     if (!response.ok) {
         throw new Error(`Enqueue failed: ${response.status}`);
     }
-    const body = await response.json();
+    const body = (await response.json()) as { jobId: string };
     return body.jobId;
 }

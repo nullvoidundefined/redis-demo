@@ -10,7 +10,7 @@ const FLAKY_SUCCESS_ATTEMPT = 2;
 
 export async function processJob(job: Job<JobData>): Promise<JobResult> {
     const { type, label } = job.data;
-    console.log(`processing ${job.id} (${type})`);
+    console.info(`processing ${job.id} (${type})`);
     if (type === 'flaky' && job.attemptsMade < FLAKY_SUCCESS_ATTEMPT) {
         throw new Error(`Simulated failure for job ${job.id} (attempt ${job.attemptsMade + 1})`);
     }
